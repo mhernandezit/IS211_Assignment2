@@ -34,13 +34,15 @@ def displayPerson(personData):
     Person # <id> is <name> with a birthday of <date>"""
     lookupid = 1
     while lookupid > 0:
+        iterid = raw_input("Please enter user ID to lookup: ")
         try:
-            lookupid = raw_input("Please enter user ID to lookup: ")
+            lookupid = int(iterid)
         except ValueError:
             logger.error("Input must be a number")
-        if lookupid in personData:
-            print("Person # {} is {} with a birthday of {}").format(lookupid, personData[lookupid][0], personData[lookupid][1]) 
-        elif int(lookupid) <= 0:
+            continue
+        if iterid in personData:
+            print("Person # {} is {} with a birthday of {}").format(iterid, personData[iterid][0], personData[iterid][1]) 
+        elif lookupid <= 0:
             print("Exiting")
             break
         else:
