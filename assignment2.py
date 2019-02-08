@@ -6,27 +6,23 @@ import argparse
 import datetime
 import csv
 import logging
+import sys
 
 def downloadData (url):
-    try:
-        req = Request(url)
-    except URLError:
-        logger.error("Unable to retrieve CSV file")
-    except HTTPError:
-        logger.error("404 error")
+    req = Request(url)
     response = urlopen(req)
     return csv.reader(response)
 
 def processData (fileData):
     personData = {}
-    for row in fileData:
+    for i, row in enumerate(fileData):
         try:
             day,month,year = row[2].split('/')
-            datetime.datetime(int(year),int(month),int(day))
+            dateData = datetime.datetime(int(year),int(month),int(day))
         except ValueError:
-            logger.error("Date/Time field is invalid: " + row[2])
+            logger.error("Error processing line #" + str(i) + " for ID # " + row[0])
             continue
-        personData[row[0]] = (row[1],row[2])
+        personData[row[0]] = (row[1],dateData)
     return personData
 
 def displayPerson(personData):
@@ -66,6 +62,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', help = 'URL to lookup', required=True)
     args = parser.parse_args()
-    csvdata = downloadData(args.url)
+    try:
+        csvdata = downloadData(args.url)
+    except URLError:
+        logger.error("Unable to retrieve CSV file")
+        print('Unable to retrieve CSV file')
+        sys.exit()
+    except HTTPError:
+        logger.error("404 error")
+        print('404, destination unreachable')
+        sys.exit()
     processDict = processData(csvdata)
     displayPerson(processDict)
