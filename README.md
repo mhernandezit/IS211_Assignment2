@@ -6,6 +6,6 @@ Importing the following libraries:
 - urllib2
 - argparse
 - datetime
-- import csv
-- import logging
-- import sys
+- csv
+- logging
+- sys
