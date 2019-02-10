@@ -24,7 +24,7 @@ def processData(fileData):
             day, month, year = row[2].split('/')
             dateData = datetime.datetime(int(year), int(month), int(day))
         except ValueError:
-            LOGGER.error("Error processing line #" + str(i) + " for ID # " + row[0])
+            logger.error("Error processing line #" + str(i) + " for ID # " + row[0])
             continue
         personData[row[0]] = (row[1], dateData)
     return personData
@@ -38,7 +38,7 @@ def displayPerson(personData):
         try:
             lookupid = int(iterid)
         except ValueError:
-            LOGGER.error("Input must be a number")
+            logger.error("Input must be a number")
             continue
         if iterid in personData:
             print("Person # {} is {} with a birthday of {}").format(iterid,\
@@ -49,10 +49,22 @@ def displayPerson(personData):
         else:
             print "No such person"
 
-def logBuilder():
-    """Builds a log file handler that can be referenced through the module"""
-    log = logging.getLogger('assignment2')
-    log.setLevel(logging.DEBUG)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', help='URL to lookup', required=True)
+    args = parser.parse_args()
+    try:
+        csvdata = downloadData(args.url)
+    except URLError:
+        logger.error("Unable to retrieve CSV file")
+        print 'Unable to retrieve CSV file'
+        sys.exit()
+    processDict = processData(csvdata)
+    displayPerson(processDict)
+
+if __name__ == '__main__':
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.ERROR)
     try:
         logFile = logging.FileHandler('errors.log')
     except IOError:
@@ -60,19 +72,5 @@ def logBuilder():
     logFile.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logFile.setFormatter(formatter)
-    log.addHandler(logFile)
-    return log
-
-if __name__ == '__main__':
-    LOGGER = logBuilder()
-    PARSER = argparse.ArgumentParser()
-    PARSER.add_argument('--url', help='URL to lookup', required=True)
-    ARGS = PARSER.parse_args()
-    try:
-        CSVDATA = downloadData(ARGS.url)
-    except URLError:
-        LOGGER.error("Unable to retrieve CSV file")
-        print 'Unable to retrieve CSV file'
-        sys.exit()
-    PROCESSDICT = processData(CSVDATA)
-    displayPerson(PROCESSDICT)
+    logger.addHandler(logFile)
+    main()
