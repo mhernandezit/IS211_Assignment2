@@ -55,6 +55,9 @@ def main():
     args = parser.parse_args()
     try:
         csvdata = downloadData(args.url)
+    except HTTPError as h:
+        logger.error(h)
+        sys.exit()
     except URLError:
         logger.error("Unable to retrieve CSV file")
         print 'Unable to retrieve CSV file'
